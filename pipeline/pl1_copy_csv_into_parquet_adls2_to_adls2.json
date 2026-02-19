@@ -65,7 +65,7 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "ls_comma_seperated_value",
+						"referenceName": "ds_comma_seperated_value",
 						"type": "DatasetReference"
 					}
 				],

@@ -1,5 +1,5 @@
 {
-	"name": "ls_comma_seperated_value",
+	"name": "ds_comma_seperated_value",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "ls_adls2_csv",
