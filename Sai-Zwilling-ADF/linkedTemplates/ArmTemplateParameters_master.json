@@ -1,0 +1,27 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "Sai-Zwilling-ADF"
+		},
+		"ls_adls2_csv_accountKey": {
+			"value": ""
+		},
+		"ls_output_adls2_accountKey": {
+			"value": ""
+		},
+		"ls_adls2_csv_properties_typeProperties_url": {
+			"value": "https://saizwillingdatalake.dfs.core.windows.net/"
+		},
+		"ls_output_adls2_properties_typeProperties_url": {
+			"value": "https://saizwillingdatalake.dfs.core.windows.net/"
+		},
+		"containerUri": {
+			"value": ""
+		},
+		"containerSasToken": {
+			"value": ""
+		}
+	}
+}

@@ -1,0 +1,414 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "Sai-Zwilling-ADF"
+		},
+		"ls_adls2_csv_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'ls_adls2_csv'"
+		},
+		"ls_output_adls2_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'ls_output_adls2'"
+		},
+		"ls_adls2_csv_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://saizwillingdatalake.dfs.core.windows.net/"
+		},
+		"ls_output_adls2_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://saizwillingdatalake.dfs.core.windows.net/"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/pl1_copy_csv_into_parquet_adls2_to_adls2')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "This pipeline is desinged to copy a sample csv file from one ADLS2 to other folder",
+				"activities": [
+					{
+						"name": "Copy Data From ADLS2 to ADLS2",
+						"description": "This Job is to copy the data from ADLS2 to ADLS2",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"additionalColumns": [
+									{
+										"name": "filepath",
+										"value": "$$FILEPATH"
+									},
+									{
+										"name": "pipeline_name",
+										"value": {
+											"value": "@pipeline()?.TriggeredByPipelineName",
+											"type": "Expression"
+										}
+									}
+								],
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": false,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings",
+									"copyBehavior": "FlattenHierarchy"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".csv"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "ls_comma_seperated_value",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "ds_output_adls2",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/ls_comma_seperated_value')]",
+				"[concat(variables('factoryId'), '/datasets/ds_output_adls2')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_output_adls2')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_output_adls2",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "google_data_sample_output.csv",
+						"folderPath": "google",
+						"fileSystem": "output"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_output_adls2')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ls_comma_seperated_value')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_adls2_csv",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "google_data_sample.csv",
+						"folderPath": "google",
+						"fileSystem": "input"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "request_id",
+						"type": "String"
+					},
+					{
+						"name": "request_status",
+						"type": "String"
+					},
+					{
+						"name": "request_html",
+						"type": "String"
+					},
+					{
+						"name": "request_url",
+						"type": "String"
+					},
+					{
+						"name": "place_id",
+						"type": "String"
+					},
+					{
+						"name": "title",
+						"type": "String"
+					},
+					{
+						"name": "data_id",
+						"type": "String"
+					},
+					{
+						"name": "type",
+						"type": "String"
+					},
+					{
+						"name": "description",
+						"type": "String"
+					},
+					{
+						"name": "phone",
+						"type": "String"
+					},
+					{
+						"name": "website",
+						"type": "String"
+					},
+					{
+						"name": "thumbnail",
+						"type": "String"
+					},
+					{
+						"name": "rating",
+						"type": "String"
+					},
+					{
+						"name": "stars",
+						"type": "String"
+					},
+					{
+						"name": "reviews",
+						"type": "String"
+					},
+					{
+						"name": "price",
+						"type": "String"
+					},
+					{
+						"name": "price_description",
+						"type": "String"
+					},
+					{
+						"name": "open_state",
+						"type": "String"
+					},
+					{
+						"name": "opens_date",
+						"type": "String"
+					},
+					{
+						"name": "address",
+						"type": "String"
+					},
+					{
+						"name": "street",
+						"type": "String"
+					},
+					{
+						"name": "city",
+						"type": "String"
+					},
+					{
+						"name": "country",
+						"type": "String"
+					},
+					{
+						"name": "postal_code",
+						"type": "String"
+					},
+					{
+						"name": "longitude",
+						"type": "String"
+					},
+					{
+						"name": "latitude",
+						"type": "String"
+					},
+					{
+						"name": "working_hours_days",
+						"type": "String"
+					},
+					{
+						"name": "working_hours_timezone",
+						"type": "String"
+					},
+					{
+						"name": "time_intervals",
+						"type": "String"
+					},
+					{
+						"name": "service_options",
+						"type": "String"
+					},
+					{
+						"name": "activities",
+						"type": "String"
+					},
+					{
+						"name": "emergency_help",
+						"type": "String"
+					},
+					{
+						"name": "pets",
+						"type": "String"
+					},
+					{
+						"name": "recycling",
+						"type": "String"
+					},
+					{
+						"name": "parking",
+						"type": "String"
+					},
+					{
+						"name": "children",
+						"type": "String"
+					},
+					{
+						"name": "service_extended_options",
+						"type": "String"
+					},
+					{
+						"name": "dining_options",
+						"type": "String"
+					},
+					{
+						"name": "payments",
+						"type": "String"
+					},
+					{
+						"name": "planning",
+						"type": "String"
+					},
+					{
+						"name": "popular_for",
+						"type": "String"
+					},
+					{
+						"name": "from_business",
+						"type": "String"
+					},
+					{
+						"name": "highlights",
+						"type": "String"
+					},
+					{
+						"name": "atmosphere",
+						"type": "String"
+					},
+					{
+						"name": "amenities",
+						"type": "String"
+					},
+					{
+						"name": "accessibility",
+						"type": "String"
+					},
+					{
+						"name": "offerings",
+						"type": "String"
+					},
+					{
+						"name": "crowd",
+						"type": "String"
+					},
+					{
+						"name": "load_date",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_adls2_csv')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ls_adls2_csv')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('ls_adls2_csv_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('ls_adls2_csv_accountKey')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ls_output_adls2')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('ls_output_adls2_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('ls_output_adls2_accountKey')]"
+					}
+				}
+			},
+			"dependsOn": []
+		}
+	]
+}
