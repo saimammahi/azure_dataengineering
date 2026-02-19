@@ -1,0 +1,9 @@
+{
+	"name": "Sai-Zwilling-ADF",
+	"location": "germanywestcentral",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "cba6436b-c212-4d9c-82f0-f799a3f53989",
+		"tenantId": "477d6293-0a28-47a2-8ce9-e15f70a53082"
+	}
+}
