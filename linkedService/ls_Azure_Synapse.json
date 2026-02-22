@@ -1,0 +1,12 @@
+{
+	"name": "ls_Azure_Synapse",
+	"properties": {
+		"annotations": [],
+		"type": "AzureSynapseArtifacts",
+		"typeProperties": {
+			"endpoint": "https://saiazuresynapse.dev.azuresynapse.net",
+			"authentication": "MSI",
+			"workspaceResourceId": "/subscriptions/aa7e10f0-66d3-4a1b-9e7e-fd2f9e27a0cd/resourceGroups/Sai-Zwilling-Resource-Group/providers/Microsoft.Synapse/workspaces/saiazuresynapse"
+		}
+	}
+}
