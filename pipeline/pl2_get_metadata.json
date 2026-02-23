@@ -68,6 +68,9 @@
 						"type": "BigDataPoolReference"
 					},
 					"executorSize": "Small",
+					"conf": {
+						"spark.dynamicAllocation.enabled": true
+					},
 					"driverSize": "Small"
 				},
 				"linkedServiceName": {
