@@ -8,10 +8,19 @@
 		"ls_adls2_csv_accountKey": {
 			"value": ""
 		},
+		"ls_metadata_copydata_accountKey": {
+			"value": ""
+		},
 		"ls_output_adls2_accountKey": {
 			"value": ""
 		},
+		"ls_Azure_Synapse_properties_typeProperties_endpoint": {
+			"value": "https://saiazuresynapse.dev.azuresynapse.net"
+		},
 		"ls_adls2_csv_properties_typeProperties_url": {
+			"value": "https://saizwillingdatalake.dfs.core.windows.net/"
+		},
+		"ls_metadata_copydata_properties_typeProperties_url": {
 			"value": "https://saizwillingdatalake.dfs.core.windows.net/"
 		},
 		"ls_output_adls2_properties_typeProperties_url": {

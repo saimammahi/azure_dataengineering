@@ -11,11 +11,23 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'accountKey' of 'ls_adls2_csv'"
 		},
+		"ls_metadata_copydata_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'ls_metadata_copydata'"
+		},
 		"ls_output_adls2_accountKey": {
 			"type": "secureString",
 			"metadata": "Secure string for 'accountKey' of 'ls_output_adls2'"
 		},
+		"ls_Azure_Synapse_properties_typeProperties_endpoint": {
+			"type": "string",
+			"defaultValue": "https://saiazuresynapse.dev.azuresynapse.net"
+		},
 		"ls_adls2_csv_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://saizwillingdatalake.dfs.core.windows.net/"
+		},
+		"ls_metadata_copydata_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://saizwillingdatalake.dfs.core.windows.net/"
 		},
@@ -114,11 +126,329 @@
 				"policy": {
 					"elapsedTimeMetric": {}
 				},
-				"annotations": []
+				"annotations": [],
+				"lastPublishTime": "2026-02-19T13:50:23Z"
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/ls_comma_seperated_value')]",
 				"[concat(variables('factoryId'), '/datasets/ds_output_adls2')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pl2_get_metadata')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "list files",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "ds_comma_seperated_value",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"fieldList": [
+								"childItems"
+							],
+							"storeSettings": {
+								"type": "AzureBlobFSReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
+							}
+						}
+					},
+					{
+						"name": "Notebook1",
+						"type": "SynapseNotebook",
+						"dependsOn": [
+							{
+								"activity": "list files",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebook": {
+								"referenceName": {
+									"value": "nb_get_list_of_files",
+									"type": "Expression"
+								},
+								"type": "NotebookReference"
+							},
+							"snapshot": true,
+							"sparkPool": {
+								"referenceName": {
+									"value": "synapsespark",
+									"type": "Expression"
+								},
+								"type": "BigDataPoolReference"
+							},
+							"executorSize": "Small",
+							"conf": {},
+							"driverSize": "Small"
+						},
+						"linkedServiceName": {
+							"referenceName": "ls_Azure_Synapse",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/ds_comma_seperated_value')]",
+				"[concat(variables('factoryId'), '/linkedServices/ls_Azure_Synapse')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_comma_seperated_value')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_adls2_csv",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "google",
+						"fileSystem": "input"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "request_id",
+						"type": "String"
+					},
+					{
+						"name": "request_status",
+						"type": "String"
+					},
+					{
+						"name": "request_html",
+						"type": "String"
+					},
+					{
+						"name": "request_url",
+						"type": "String"
+					},
+					{
+						"name": "place_id",
+						"type": "String"
+					},
+					{
+						"name": "title",
+						"type": "String"
+					},
+					{
+						"name": "data_id",
+						"type": "String"
+					},
+					{
+						"name": "type",
+						"type": "String"
+					},
+					{
+						"name": "description",
+						"type": "String"
+					},
+					{
+						"name": "phone",
+						"type": "String"
+					},
+					{
+						"name": "website",
+						"type": "String"
+					},
+					{
+						"name": "thumbnail",
+						"type": "String"
+					},
+					{
+						"name": "rating",
+						"type": "String"
+					},
+					{
+						"name": "stars",
+						"type": "String"
+					},
+					{
+						"name": "reviews",
+						"type": "String"
+					},
+					{
+						"name": "price",
+						"type": "String"
+					},
+					{
+						"name": "price_description",
+						"type": "String"
+					},
+					{
+						"name": "open_state",
+						"type": "String"
+					},
+					{
+						"name": "opens_date",
+						"type": "String"
+					},
+					{
+						"name": "address",
+						"type": "String"
+					},
+					{
+						"name": "street",
+						"type": "String"
+					},
+					{
+						"name": "city",
+						"type": "String"
+					},
+					{
+						"name": "country",
+						"type": "String"
+					},
+					{
+						"name": "postal_code",
+						"type": "String"
+					},
+					{
+						"name": "longitude",
+						"type": "String"
+					},
+					{
+						"name": "latitude",
+						"type": "String"
+					},
+					{
+						"name": "working_hours_days",
+						"type": "String"
+					},
+					{
+						"name": "working_hours_timezone",
+						"type": "String"
+					},
+					{
+						"name": "time_intervals",
+						"type": "String"
+					},
+					{
+						"name": "service_options",
+						"type": "String"
+					},
+					{
+						"name": "activities",
+						"type": "String"
+					},
+					{
+						"name": "emergency_help",
+						"type": "String"
+					},
+					{
+						"name": "pets",
+						"type": "String"
+					},
+					{
+						"name": "recycling",
+						"type": "String"
+					},
+					{
+						"name": "parking",
+						"type": "String"
+					},
+					{
+						"name": "children",
+						"type": "String"
+					},
+					{
+						"name": "service_extended_options",
+						"type": "String"
+					},
+					{
+						"name": "dining_options",
+						"type": "String"
+					},
+					{
+						"name": "payments",
+						"type": "String"
+					},
+					{
+						"name": "planning",
+						"type": "String"
+					},
+					{
+						"name": "popular_for",
+						"type": "String"
+					},
+					{
+						"name": "from_business",
+						"type": "String"
+					},
+					{
+						"name": "highlights",
+						"type": "String"
+					},
+					{
+						"name": "atmosphere",
+						"type": "String"
+					},
+					{
+						"name": "amenities",
+						"type": "String"
+					},
+					{
+						"name": "accessibility",
+						"type": "String"
+					},
+					{
+						"name": "offerings",
+						"type": "String"
+					},
+					{
+						"name": "crowd",
+						"type": "String"
+					},
+					{
+						"name": "load_date",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_adls2_csv')]"
 			]
 		},
 		{
@@ -377,6 +707,21 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/ls_Azure_Synapse')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSynapseArtifacts",
+				"typeProperties": {
+					"endpoint": "[parameters('ls_Azure_Synapse_properties_typeProperties_endpoint')]",
+					"authentication": "MSI",
+					"workspaceResourceId": "/subscriptions/aa7e10f0-66d3-4a1b-9e7e-fd2f9e27a0cd/resourceGroups/Sai-Zwilling-Resource-Group/providers/Microsoft.Synapse/workspaces/saiazuresynapse"
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/ls_adls2_csv')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
@@ -388,6 +733,23 @@
 					"accountKey": {
 						"type": "SecureString",
 						"value": "[parameters('ls_adls2_csv_accountKey')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ls_metadata_copydata')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('ls_metadata_copydata_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('ls_metadata_copydata_accountKey')]"
 					}
 				}
 			},
