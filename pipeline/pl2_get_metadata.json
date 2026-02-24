@@ -33,7 +33,7 @@
 				}
 			},
 			{
-				"name": "Notebook1",
+				"name": "Copying the data from ADLS2 to ADLS2",
 				"type": "SynapseNotebook",
 				"dependsOn": [
 					{
