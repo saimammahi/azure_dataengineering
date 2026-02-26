@@ -5,12 +5,20 @@
 			"referenceName": "ls_output_adls2",
 			"type": "LinkedServiceReference"
 		},
+		"parameters": {
+			"_file_name": {
+				"type": "string"
+			}
+		},
 		"annotations": [],
 		"type": "DelimitedText",
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileName": "google_data_sample_output.csv",
+				"fileName": {
+					"value": "@dataset()._file_name",
+					"type": "Expression"
+				},
 				"folderPath": "google",
 				"fileSystem": "output"
 			},
